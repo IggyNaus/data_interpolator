@@ -8,24 +8,39 @@ import pandas as pd
 
 class NearestNeighbour():
     #ds = the dataset that were using
-    #gr = the new grid resolution wanted
-    #nds = new interpolated ds
-    def __init__(self,ds,lat,lon):
+    #gr = new grid resolution, tuple of a lat & lon
+    #nds = new interpolated dataset
+    def __init__(self,ds,gr):
         self.ds = ds
-        self.lat = lat
-        self.lon = lon
+        self.gr = gr
+        try:
+            self.lat = gr[1]
+            self.lon = gr[2]
+        except IndexError:
+            text = 'wrong grid resolution input, please input a tuple with lat & lon'
+            return print(text)
+
     def Interpolate(self):
-        nds = self.ds.sel(self.lat,self.lon,method='nearest')
-        return nds
+        try:
+            nds = self.ds.sel(self.lat,self.lon,method='nearest')
+            return nds
+        except TypeError:
+            text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
+            return print(text)
 
 class Bilinear():
     #ds = the dataset that were using
-    #lat,lon = the new grid resolution wanted
-    #nds = new interpolated ds
-    def __init__(self,ds,lat,lon):
+    #gr = new grid resolution, tuple of a lat & lon
+    #nds = new interpolated dataset
+    def __init__(self,ds,gr):
         self.ds = ds
-        self.lat = lat
-        self.lon = lon
+        try:
+            self.lat = gr[1]
+            self.lon = gr[2]
+        except IndexError:
+            text = 'wrong grid resolution input, please input a tuple with lat & lon'
+            return print(text)
+        
     def Interpolate(self):
         nds = self.ds.interp(self.lat,self.lon)
         return nds
