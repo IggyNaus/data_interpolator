@@ -6,7 +6,9 @@ import xarray as xr
 
 
 # first q: file path?
-file_path = "file.txt"
+input_file_path = "in_file.txt"
+output_file_path = "out_file.txt"
 
-def text_input_filepath(file_name):
-    file_path = file_name
+def text_input_filepath(in_file_name, out_file_name):
+    input_file_path = file_name
+    output_file_path = out_file_name
