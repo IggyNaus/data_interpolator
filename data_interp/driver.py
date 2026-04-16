@@ -1,5 +1,7 @@
 import argparse
 
+from dataset import text_input_filepath
+
 
 ## User input
 parser = argparse.ArgumentParser(description="Analyse file name, resolution input, ")
@@ -14,4 +16,4 @@ print(f"Selected File: {args.file_name}")
 # print(f"Output:    {args.outfile}")
 
 
-
+text_input_filepath(args.file_name)
