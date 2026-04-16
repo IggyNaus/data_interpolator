@@ -1,5 +1,5 @@
 # Data Interpolator Final Project
-### A versatile package that features robust and flexible dataset creation, a variety of interpolation methods for users to pick from, and high-quality plotting support. Below has ideas and first draft concepts for the functions we would like to implement.
+A versatile package that features robust and flexible dataset creation, a variety of interpolation methods for users to pick from, and high-quality plotting support. Below has ideas and first draft concepts for the functions we would like to implement.
 
 
 ## dataset.py → Handling of various data types. Configuring csvs, netcdfs, and import/export of data. 
