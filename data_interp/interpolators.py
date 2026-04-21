@@ -87,7 +87,11 @@ if __name__ == "__main__":
     ds_nn_pd = NearestNeighbour(ds_fine_pd, new_grid)
     if ds_nn_pd == ds_nn_xr:
         print('nn works')
+    else:
+        print('nn broke')
     ds_bl_xr = Bilinear(ds_fine_xr, new_grid)
     ds_bl_pd = Bilinear(ds_fine_pd, new_grid)
     if ds_bl_pd == ds_bl_xr:
         print('bl works')
+    else:
+        print('bl broke')
