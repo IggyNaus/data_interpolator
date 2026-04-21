@@ -81,9 +81,13 @@ if __name__ == "__main__":
         {'t2m': (['lat', 'lon'], T, {'units': 'K'})},
         coords={'lat': lats_fine, 'lon': lons_fine}
     )
-    ds_fine_pd = pd.DataFrame(data=T, )
+    ds_fine_pd = pd.DataFrame(data=T)
 
-    ds_nn = NearestNeighbour(ds_fine_xr, new_grid)
-    print(ds_nn)
-    ds_bl = Bilinear(ds_fine_xr, new_grid)
-    print(ds_bl)
+    ds_nn_xr = NearestNeighbour(ds_fine_xr, new_grid)
+    ds_nn_pd = NearestNeighbour(ds_fine_pd, new_grid)
+    if ds_nn_pd == ds_nn_xr:
+        print('nn works')
+    ds_bl_xr = Bilinear(ds_fine_xr, new_grid)
+    ds_bl_pd = Bilinear(ds_fine_pd, new_grid)
+    if ds_bl_pd == ds_bl_xr:
+        print('bl works')
