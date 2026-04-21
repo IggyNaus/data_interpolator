@@ -45,8 +45,15 @@ class Bilinear():
             return print(text)
         
     def Interpolate(self):
-        nds = self.ds.interp(self.lat,self.lon)
-        return nds
+        try:
+            if self.ds == pd.DataFrame():
+                nds = self.ds.interpolate(method='linear')
+            else:    
+                nds = self.ds.interp(self.lat,self.lon)
+            return nds
+        except TypeError:
+            text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
+            return print(text)
 
 #IDW:
 #   need: data, new grid resolution, power parameter (has default), nearest neighbour vs. full sample (defaultss to nn)
@@ -70,12 +77,13 @@ if __name__ == "__main__":
     T = 300 - 0.5 * (LAT - 25) + 3 * np.sin(np.radians(LON + 100))
     T += np.random.default_rng(42).normal(0, 0.5, T.shape)
 
-    ds_fine = xr.Dataset(
+    ds_fine_xr = xr.Dataset(
         {'t2m': (['lat', 'lon'], T, {'units': 'K'})},
         coords={'lat': lats_fine, 'lon': lons_fine}
     )
+    ds_fine_pd = pd.DataFrame(data=T, )
 
-    ds_nn = NearestNeighbour(ds_fine, new_grid)
+    ds_nn = NearestNeighbour(ds_fine_xr, new_grid)
     print(ds_nn)
-    ds_bl = Bilinear(ds_fine, new_grid)
+    ds_bl = Bilinear(ds_fine_xr, new_grid)
     print(ds_bl)
