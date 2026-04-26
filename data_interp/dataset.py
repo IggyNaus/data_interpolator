@@ -18,6 +18,7 @@ def df_get_col_names(df):
     return names
 
 def format_df_datetime(df):
+    
     timeName = input("Please enter name of time column: ")
     dateName = input("Please enter name of date column: ")
     time = (
@@ -26,8 +27,7 @@ def format_df_datetime(df):
         .str.replace(r"a$", "AM", regex=True)
         .str.replace(r"p$", "PM", regex=True)
     )
-    date = pd.to_datetime(df[dateName].astype(str).str.strip() + " " + t,format="%m/%d/%y %I:%M%p",errors="coerce",
-    )
+    date = pd.to_datetime(df[dateName].astype(str).str.strip() + " " + t,format="%m/%d/%y %I:%M%p",errors="coerce")
     df = df.set_index(dt).drop(columns=[dateName, timeName])
     df.index.name = "datetime"
 
@@ -57,15 +57,11 @@ def dataset_read_csv(file_name):
             continue
 
     return df
-    
-
-    
 
 
-def text_input_filepath(in_file_name, out_file_name):
-    input_file_path = file_name
-    output_file_path = out_file_name
-
+def dataset_read_nc(file_name):
+    xar = xr.open_dataset(file_name)
+    return xar
 
 
 
@@ -74,4 +70,6 @@ if __name__ == "__main__":
     INfile_path = Path("..").joinpath("data_interpolator").joinpath("filtered-copy-fixed-crop.csv")
     OUTfile_path = Path("..").joinpath("data_interpolator").joinpath("test_output.nc")
     df = dataset_read_csv(INfile_path)
+
+    INfile_path = Path("..").joinpath("data_interpolator").joinpath("sample_data_camulator.nc")
 #ATOC_4815/data_interpolator/filtered-copy-fixed-crop.csv
