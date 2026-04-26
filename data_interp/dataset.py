@@ -17,8 +17,10 @@ def df_get_col_names(df):
     names = df.columns.tolist()
     return names
 
-def format_df_datetime(df):
-    
+def skywatch_df_datetime(df):
+    """
+    From Lab6 given code, formats data from ATOC Skywatch Laboratory 
+    """
     timeName = input("Please enter name of time column: ")
     dateName = input("Please enter name of date column: ")
     time = (
@@ -30,6 +32,11 @@ def format_df_datetime(df):
     date = pd.to_datetime(df[dateName].astype(str).str.strip() + " " + t,format="%m/%d/%y %I:%M%p",errors="coerce")
     df = df.set_index(dt).drop(columns=[dateName, timeName])
     df.index.name = "datetime"
+    df.columns = [
+        "_".join([str(a).strip(), str(b).strip()]).replace(" ", "_").strip("_")
+        for a, b in df.columns
+    ]
+    return df
 
 def dataset_read_csv(file_name):
     """
@@ -44,7 +51,7 @@ def dataset_read_csv(file_name):
     print(f"Imported DF with Columns: {names}") 
     
     # Instead of assuming naming conventiosn or trying to search for times and dates directly, have user specify
-    print(f"Try to coerce date and time format?")
+    print(f"ATOC SKYWATCH: Try to coerce date and time format?")
     formatted = False
     while not(formatted):
         format = input("[y / n]: ")

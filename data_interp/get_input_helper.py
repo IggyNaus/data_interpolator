@@ -50,6 +50,23 @@ def basic_map_inputs():
     lat_start, lat_end, lon_start, lon_end = map_lat_long()
     return (var_name, lat_start, lat_end, lon_start, lon_end)
 
+# def addt_map_inputs(identicalVar, identicalRange):
+#     """
+#     Determines what information to collect from user based on what is shared with first plot
+
+#     """
+#     if identicalVar: 
+#         pass
+#     else:
+#         var_2 = map_var()
+    
+#     if identicalRange: 
+#         pass
+#     else: 
+#         lat_start_2, lat_end_2, lon_start_2, lon_end_2 = map_lat_long()
+
+
+
 def colourmap_helper():
     """
     Colourmap code helper. Provides user a list of acceptable maps. 
@@ -57,13 +74,13 @@ def colourmap_helper():
     """
     colourmap = "YlGnBu"
     cmap = str(input("Custom Colourmap? (Enter [Y/N]): "))
-    if ((cmap == "Y") or (cmap == "y")):
+    if ((cmap == "Y") or (cmap == "y") or (cmap == "Yes") or (cmap == "yes")):
         print(f"Available colourmaps can be found here: https://matplotlib.org/stable/gallery/color/colormap_reference.html")
         colourmap = input("Please input desired colourmap name: ")
-    elif ((cmap == "N") or (cmap == "n")):
+    elif ((cmap == "N") or (cmap == "n") or (cmap == "No") or (cmap == "no")):
         pass
     else:
-        raise ValueError("Incorrect colourmap input (Correct inputs: Y, y, N, n)")
+        raise ValueError("Incorrect colourmap input (Correct inputs: Y, y, N, n, Yes, yes, No, no)")
     return colourmap
 
 
@@ -85,4 +102,24 @@ def get_inputs_helper(layout_code):
             colourmap1 = colourmap_helper()
 
             #second map:
-            identicalVar = input("Second map - Plot same variable as before?")
+            identicalVar = input("Second map - Plot same variable as before? [Y/N]")
+            if ((identicalVar == "Y") or (identicalVar == "y") or (identicalVar == "Yes") or (identicalVar == "yes")):
+                var_name2 = var_name1
+            elif ((identicalVar == "N") or (identicalVar == "n") or (identicalVar == "No") or (identicalVar == "no")):
+                var_name2 = map_var()
+            else:
+                raise ValueError("Incorrect input (Correct inputs: Y, y, N, n, Yes, yes, No, no)")
+            
+            identicalRange = input("Second map - Plot same variable as before? [Y/N]")
+            if ((identicalRanger == "Y") or (identicalRange == "y") or (identicalRange == "Yes") or (identicalRange == "yes")):
+                lat_start2 = lat_start1 
+                lat_end2 = lat_end1 
+                lon_start2 = lon_start1 
+                lon_end2 = lon_end1
+            elif ((identicalRange == "N") or (identicalRange == "n") or (identicalRange == "No") or (identicalRange == "no")):
+                lat_start2, lat_end2, lon_start2, lon_end2 = map_lat_long()
+            else:
+                raise ValueError("Incorrect input (Correct inputs: Y, y, N, n, Yes, yes, No, no)")
+            
+            return (var_name1, lat_start1, lat_end1, lon_start1, lon_end1, var_name2, lat_start2, lat_end2, lon_start2, lon_end2)
+

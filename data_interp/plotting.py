@@ -98,3 +98,4 @@ class Plotters():
         match layout:
             case "1m":
                 get_input_helper(layout)
+            case "1m1m":
