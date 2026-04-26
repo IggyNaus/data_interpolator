@@ -86,6 +86,8 @@ class Plotters():
             simple map, code: 1m
             simple plot, code: 1p
             (1)/(1), (1x map over 1x map), code: 1m1m
+                AA
+                BB
             (1)/(2 - 2), (1x map over 2x simple plot), code: 1m2p 
                 AA
                 BC
@@ -119,7 +121,9 @@ class Plotters():
                 fig, ax = plt.subplots(figsize=(2, 2), layout='constrained')
                 simple_map(ax, var_name, lat_start, lat_end, lon_start, lon_end, colour_map=colourmap)
             case "1m1m":
-                
+                (var_name1, lat_start1, lat_end1, lon_start1, lon_end1, 
+                var_name2, lat_start2, lat_end2, lon_start2, lon_end2) = get_input_helper(layout)
+
                 axes = plt.figure(layout="constrained").subplot_mosaic(
                     """
                     AA
@@ -128,3 +132,5 @@ class Plotters():
                     height_ratios=[1, 2],
                     subplot_kw=dict(projection=ccrs.PlateCarree())
                 )
+                simple_map(axes["A"], var_name1, lat_start1, lat_end1, lon_start1, lon_end1, colour_map=colourmap1)
+                simple_map(axes["B"], var_name2, lat_start2, lat_end2, lon_start2, lon_end2, colour_map=colourmap2)
