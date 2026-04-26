@@ -4,7 +4,7 @@ import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 
-from data_interp.get_input_helper import get_input_helper
+from data_interp.get_input_helper import get_inputs_helper
 
 class Plotters():
     """
@@ -75,32 +75,7 @@ class Plotters():
         pass_ax.add_feature(cfeature.LAND, facecolor='lightgray', alpha=0.3)
         pass_ax.gridlines(draw_labels=True, linewidth=0.5, alpha=0.5)
     
-    def get_inputs_helper(self, layout):
-        match layout:
-            case "1m":
-                # Any case with at least one map, but ONLY maps
-                # pass_ax, var_name, lat_range, lon_range, color_map = 'YlGnBu', transformation=ccrs.PlateCarree()
-                var_name = input("Please enter target variable: ")
-                lat_start = float(input("Please enter start latitude: "))
-                lat_end = float(input("Please enter end latitude: "))
-                lon_start = float(input("Please enter start longitude: "))
-                lon_end = float(input("Please enter end longitude: "))
-                
-                # Type Check
-                if not(
-                    (str(type(var_name)) == "<class 'str'>")
-                    and (str(type(lat_start)) == "<class 'float'>")
-                    and (str(type(test3)) == "<class 'float'>")
-                    and (str(type(test4)) == "<class 'float'>")
-                    and (str(type(test5)) == "<class 'float'>")
-                    ):
-                    raise ValueError("Variable name should be a valid string. Latitude & Longitude start AND end must be floats.")
-
-                # Start and End value guard for plotting methods
-                assert lat_start < lat_end, "Latitude start must be smaller than latitude end"
-                assert lon_start < lon_end, "Longitude start must be smaller than longitude end"
-
-
+    
 
     def simple_layout(self, layout):
         """
