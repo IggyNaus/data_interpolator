@@ -36,7 +36,7 @@ class Plotters():
         ax.set_ylabel(y)
         ax.set_xlabel(x)
 
-    def simple_map(self, pass_ax, var_name, lat_range, lon_range, color_map = 'YlGnBu', transformation=ccrs.PlateCarree()):
+    def simple_map(self, pass_ax, var_name, lat_range, lon_range, colour_map = 'YlGnBu', transformation=ccrs.PlateCarree()):
         """
         Simple geographic plot. 
         ASSUMES LAT, LON ON -180 TO 180 RANGE! And, that Start < End.
@@ -87,8 +87,26 @@ class Plotters():
             simple plot, code: 1p
             (1)/(1), (1x map over 1x map), code: 1m1m
             (1)/(2 - 2), (1x map over 2x simple plot), code: 1m2p 
+                AA
+                BC
             (2 - 2)/(1), (2x simple plot over 1x map), code: 2p1m
-            (2 - 2)/(2 - 2) (2x2 simple plot), code 2p2p
+                BC
+                AA
+            (2 - 2)/(2 - 2) (2x2 simple plot), code: 2p2p
+                AB
+                CD
+            (1)/(1)/(2 - 2) (1x map over 1x map over 2x simple plot), code: 1m1m2p
+                AA
+                BB
+                CD
+                - ideal for comparing two different methods and errors etc
+            (1)/(1)/(1)/(1)/(1), (5x map), code: 5m
+                AA
+                BB
+                CC
+                DD
+                EE
+                - ideal for showcasing all methods 
         
         Arguments:
             layout - layout code. key provided above under available layouts
@@ -97,5 +115,16 @@ class Plotters():
         # I know user input like this isn't necessarily the best way to do it so revisit later?
         match layout:
             case "1m":
-                get_input_helper(layout)
+                (var_name, lat_start, lat_end, lon_start, lon_end, colourmap) = get_input_helper(layout)
+                fig, ax = plt.subplots(figsize=(2, 2), layout='constrained')
+                simple_map(ax, var_name, lat_start, lat_end, lon_start, lon_end, colour_map=colourmap)
             case "1m1m":
+                
+                axes = plt.figure(layout="constrained").subplot_mosaic(
+                    """
+                    AA
+                    BB
+                    """,
+                    height_ratios=[1, 2],
+                    subplot_kw=dict(projection=ccrs.PlateCarree())
+                )
