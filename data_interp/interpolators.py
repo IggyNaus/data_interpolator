@@ -114,13 +114,13 @@ class IDW():
         # colapse grid into 1D
         self.lats, self.lons = self.lats.flatten(), self.lons.flatten()
         
-    def distance_matrix(self):
+    def distance_matrix(self,x0,y0,x1,y2):
         """ Make a distance matrix between pairwise observations.
         Note: from <http://stackoverflow.com/questions/1871536> 
         """
         
-        obs = np.vstack((self.lat, self.lon)).T
-        interp = np.vstack((self.lats, self.lons)).T
+        obs = np.vstack((x0, y0)).T
+        interp = np.vstack((x1, y2)).T
 
         d0 = np.subtract.outer(obs[:,0], interp[:,0])
         d1 = np.subtract.outer(obs[:,1], interp[:,1])
@@ -137,7 +137,7 @@ class IDW():
             As power increases, the weights for distant points decrease rapidly.
             """
             
-            dist = self.distance_matrix(self.lat,self.lon, self.lats,self.lons)
+            dist = self.distance_matrix(self.lat,self.lon,self.lats,self.lons)
 
             # In IDW, weights are 1 / distance
             weights = 1.0/(dist+1e-12)**self.power
@@ -293,7 +293,7 @@ if __name__ == "__main__":
     # #check if xr & pd give same result for idw
     ds_idw_xr = IDW(ds_fine_xr, new_grid).Interpolate()
     ds_idw_pd = IDW(ds_fine_pd, new_grid).Interpolate()
-    if (ds_idw_pd == ds_idw_xr):
+    if (ds_idw_pd == ds_idw_xr).all():
         print('idw gives same result for xr and pd')
     else:
         print('idw does not give same result for xr and pd')
