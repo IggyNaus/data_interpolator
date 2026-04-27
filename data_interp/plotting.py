@@ -282,10 +282,10 @@ if __name__ == "__main__":
     cam_data_spatialAvg = cam_data['PRECT'].mean(dim=['latitude','longitude'])
     cam_data_timeAvg = cam_data_spatialAvg.mean(dim='time')
     x1_str=cam_data['time'].dt.strftime("%m/%d/%Y")
-    x1_ticks = x1_str[::8]
+    x1_ticks = x1_str[::10]
     y1 = cam_data_spatialAvg
 
-    y2 = (cam_data_spatialAvg-cam_data_timeAvg)
+    y2 = cam_data_spatialAvg = cam_data['TREFHT'].mean(dim=['latitude','longitude'])
 
     
     plot_2p1m = Plotters(cam_data_timenonsAvg)
@@ -297,10 +297,10 @@ if __name__ == "__main__":
     # plt.savefig("PRECT_2p1m.png", dpi=250, bbox_inches='tight')
     
     axes = plot_2p1m.simple_layout_plots("1m1m2p", x1_str, y1, x1_str, y2)
-    axes["A"].set_title("Spatial Average Time Series")
+    axes["A"].set_title("PRECT Spatial Average")
     axes["A"].set_ylabel("PRECT")
     axes["A"].set_xticks(x1_ticks)
-    axes["B"].set_title("Spatial Average Anomaly")
+    axes["B"].set_title("TREFHT Spatial Average")
     axes["B"].set_ylabel("PRECT Anomaly")
     plt.savefig(("PRECT_and_TREFHT" + "_1m1m2p.png"),dpi=250,bbox_inches='tight')
 
