@@ -36,7 +36,7 @@ class Plotters():
         ax.set_ylabel(y)
         ax.set_xlabel(x)
 
-    def simple_map(self, pass_ax, var_name, lat_range, lon_range, colour_map = 'YlGnBu', transformation=ccrs.PlateCarree()):
+    def simple_map(self, pass_ax, var_name, lat_start, lat_end, lon_start, lon_end, colour_map = 'YlGnBu', transformation=ccrs.PlateCarree()):
         """
         Simple geographic plot. 
         ASSUMES LAT, LON ON -180 TO 180 RANGE! And, that Start < End.
@@ -51,15 +51,15 @@ class Plotters():
             color_map - colormap code of choice 
             transformation - ccrs transformation type. Default is Plate Carree
         """
-        lat_start = lat_range[0]
-        lat_end = lat_range[1]
-        lon_start = lon_range[0]
-        lon_end = lon_range[1]
+        # lat_start = lat_range[0]
+        # lat_end = lat_range[1]
+        # lon_start = lon_range[0]
+        # lon_end = lon_range[1]
 
         etsAp = self.ds[var_name].plot(
             ax=pass_ax,
             transform=transformation,                # data is on regular lat/lon
-            cmap=color_map,
+            cmap=colour_map,
             add_colorbar=True                        # To adjust to custom colourbar location, switch this to False   
         )
         pass_ax.set_extent([lat_start, lat_end, lon_start, lon_end], crs=transformation)
@@ -117,20 +117,64 @@ class Plotters():
         # I know user input like this isn't necessarily the best way to do it so revisit later?
         match layout:
             case "1m":
-                (var_name, lat_start, lat_end, lon_start, lon_end, colourmap) = get_input_helper(layout)
+                (var_name, lat_start, lat_end, lon_start, lon_end, colourmap) = get_inputs_helper(layout)
                 fig, ax = plt.subplots(figsize=(2, 2), layout='constrained')
-                simple_map(ax, var_name, lat_start, lat_end, lon_start, lon_end, colour_map=colourmap)
+                self.simple_map(ax, var_name, lat_start, lat_end, lon_start, lon_end, colour_map=colourmap)
             case "1m1m":
-                (var_name1, lat_start1, lat_end1, lon_start1, lon_end1, 
-                var_name2, lat_start2, lat_end2, lon_start2, lon_end2) = get_input_helper(layout)
+                (var_name1, lat_start1, lat_end1, lon_start1, lon_end1, colourmap1,
+                var_name2, lat_start2, lat_end2, lon_start2, lon_end2, colourmap2) = get_inputs_helper(layout)
+                # Debug:
+                # print(f"First map, variable: {var_name1}")
+                # print(f"First map, latitude start: {lat_start1}")
+                # print(f"First map, latitude end: {lat_end1}") 
+                # print(f"First map, longitude start: {lon_start1}") 
+                # print(f"First map, longitude end: {lon_end1}") 
+                # print(f"First map, colourmap: {colourmap1}")
+                # print(f"Second map, variable: {var_name2}")
+                # print(f"Second map, latitude start: {lat_start2}")
+                # print(f"Second map, latitude end: {lat_end2}") 
+                # print(f"Second map, longitude start: {lon_start2}") 
+                # print(f"Second map, longitude end: {lon_end2}") 
+                # print(f"Second map, colourmap: {colourmap2}")
+                
 
                 axes = plt.figure(layout="constrained").subplot_mosaic(
                     """
                     AA
                     BB
                     """,
-                    height_ratios=[1, 2],
+                    height_ratios=[1, 1],
                     subplot_kw=dict(projection=ccrs.PlateCarree())
                 )
-                simple_map(axes["A"], var_name1, lat_start1, lat_end1, lon_start1, lon_end1, colour_map=colourmap1)
-                simple_map(axes["B"], var_name2, lat_start2, lat_end2, lon_start2, lon_end2, colour_map=colourmap2)
+                self.simple_map(pass_ax=axes["A"], var_name=var_name1, lat_start=lat_start1, 
+                lat_end=lat_end1, lon_start=lon_start1, lon_end=lon_end1, colour_map=colourmap1)
+                self.simple_map(pass_ax=axes["B"], var_name=var_name2, lat_start=lat_start2, 
+                lat_end=lat_end2, lon_start=lon_start2, lon_end=lon_end2, colour_map=colourmap2)
+                plt.savefig((var_name1 + "_and_" + var_name2+"_1m1m.png"),dpi=250,bbox_inches='tight')
+            case "1p":
+                x, y = get_inputs_helper("1p")
+                fig,ax = plt.subplots(figsize=(2, 2), layout='constrained')
+                self.simple_plot(ax,x,y)
+                
+            
+
+
+
+
+if __name__ == "__main__":
+    from data_interp.dataset import dataset_read_nc, dataset_read_csv
+    
+    cam_data = dataset_read_nc("../data_interpolator/sample_data_camulator.nc")
+    
+    # extent: [-20, 40, 35, 65]
+    # var: PRECT
+    
+    cam_data.coords['longitude'] = (cam_data.coords['longitude'] + 180) % 360 - 180
+    cam_data = cam_data.sortby(cam_data.longitude)
+
+    cam_data_timenonsAvg = cam_data.mean(dim='time')
+
+
+    plot_test = Plotters(cam_data_timenonsAvg)
+    plot_test.simple_layout("1m1m")
+

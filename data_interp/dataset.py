@@ -68,6 +68,7 @@ def dataset_read_csv(file_name):
 
 def dataset_read_nc(file_name):
     xar = xr.open_dataset(file_name)
+    print(f"Imported .nc with variables: {list(xar.variables)}")
     return xar
 
 
