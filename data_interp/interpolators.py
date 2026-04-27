@@ -84,9 +84,8 @@ class krigging():
             self.ds['lon'],
             self.ds['temp'],
             verbose=False,
-            enable_plotting=False
-        )
-            nds = OK.execute("grid", lats_coarse, lons_coarse)
+            enable_plotting=False)
+            nds = OK.execute("grid", self.lats, self.lons)
             return nds
         except TypeError:
             text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
@@ -133,3 +132,10 @@ if __name__ == "__main__":
         print('bl works')
     else:
         print('bl broke')
+
+    ds_kr_xr = krigging(ds_fine_xr, new_grid).Interpolate()
+    ds_kr_pd = krigging(ds_fine_pd, new_grid).Interpolate()
+    if ds_kr_pd['temp'] == ds_kr_xr:
+        print('kr works')
+    else:
+        print('kr broke')
