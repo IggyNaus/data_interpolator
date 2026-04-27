@@ -59,6 +59,74 @@ class Bilinear():
 
 #IDW:
 #   need: data, new grid resolution, power parameter (has default), nearest neighbour vs. full sample (defaultss to nn)
+class idw():
+    #ds = the dataset that were using
+    #gr = new grid resolution, tuple of a lat & lon
+    #nds = new interpolated dataset
+    def __init__(self,ds,gr,power=1):
+        self.ds = ds
+        self.power = power
+        if isinstance(self.ds, xr.Dataset):
+            self.ds = self.ds.to_dataframe().reset_index()
+        self.ds = self.ds.set_axis(['lat','lon','data'],axis=1)
+
+        self.lat = self.ds['lat']
+        self.lon = self.ds['lat']
+        self.data = self.ds['data']
+
+        if self.lat.size < self.lon.size:
+            self.lat.size = np.linspace(self.lat[0],self.lat[-1],num=self.lon.size)
+        if self.lon.size < self.lat.size:
+            self.lon.size = np.linspace(self.lat[0],self.lat[-1],num=self.lat.size)
+
+        try:
+            self.lats = gr[0]
+            self.lons = gr[1]
+        except IndexError:
+            text = 'wrong grid resolution input, please input a tuple with lat & lon'
+            return print(text)
+        
+        self.lats, self.lons = np.meshgrid(self.lats, self.lons)
+
+        # colapse grid into 1D
+        self.lats, self.lons = self.lats.flatten(), self.lons.flatten()
+        
+    def distance_matrix(self):
+        """ Make a distance matrix between pairwise observations.
+        Note: from <http://stackoverflow.com/questions/1871536> 
+        """
+        
+        obs = np.vstack((self.lat, self.lon)).T
+        interp = np.vstack((self.lats, self.lons)).T
+
+        d0 = np.subtract.outer(obs[:,0], interp[:,0])
+        d1 = np.subtract.outer(obs[:,1], interp[:,1])
+    
+        # calculate hypotenuse
+        return np.hypot(d0, d1) 
+       
+    def Interpolate(self):
+        try:
+            """ Simple inverse distance weighted (IDW) interpolation 
+            Weights are proportional to the inverse of the distance, so as the distance
+            increases, the weights decrease rapidly.
+            The rate at which the weights decrease is dependent on the value of power.
+            As power increases, the weights for distant points decrease rapidly.
+            """
+            
+            dist = self.distance_matrix(self.lat,self.lon, self.lats,self.lons)
+
+            # In IDW, weights are 1 / distance
+            weights = 1.0/(dist+1e-12)**self.power
+
+            # Make weights sum to one
+            weights /= weights.sum(axis=0)
+
+            # Multiply the weights for each interpolated point by all observed Z-values
+            return np.dot(weights.T, self.data)
+        except TypeError:
+            text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
+            return print(text)
 
 #krigging:
 #   need: data, new grid resolution, semivariogram
@@ -139,6 +207,13 @@ if __name__ == "__main__":
         print('bl gives same result for xr and pd')
     else:
         print('bl does not give same result for xr and pd')
+
+    ds_idw_xr = idw(ds_fine_xr, new_grid).Interpolate()
+    ds_idw_pd = idw(ds_fine_pd, new_grid).Interpolate()
+    if (ds_idw_pd == ds_idw_xr):
+        print('idw gives same result for xr and pd')
+    else:
+        print('idw does not give same result for xr and pd')
 
     ds_kr_xr = krigging(ds_fine_xr, new_grid).Interpolate()
     ds_kr_pd = krigging(ds_fine_pd, new_grid).Interpolate()
