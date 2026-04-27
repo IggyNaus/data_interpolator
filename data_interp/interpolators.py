@@ -5,28 +5,31 @@ import pandas as pd
 import pykrige.kriging_tools as kt
 from pykrige.ok import OrdinaryKriging
 
-#this is Iggys job mostly
-
-#want to define 5 classes: Nearest neighour, bilinear, IDW, unversal krgigging, and Barnes
 
 class NearestNeighbour():
-    #ds = the dataset that were using
-    #gr = new grid resolution, tuple of a lat & lon
-    #nds = new interpolated dataset
+    """
+        Nearest neighbour interpolation for a dataset
+        
+        Arguments:
+            ds - original dataset (lat, lon, data) xr.Dataset or pd.DataFrame
+            gr - new grid wanted (tuple) 
+    """
     def __init__(self,ds,gr):
         self.ds = ds
+
+        #gets ds into correct format
         if isinstance(self.ds, pd.DataFrame):
             self.ds = self.ds.set_index(['lat','lon']).to_xarray()
-        self.gr = gr
+
+        #get new lat,lon from gr
         try:
-            self.lats = gr[0]
-            self.lons = gr[1]
+            self.lats = self.gr[0]
+            self.lons = self.gr[1]
         except IndexError:
             text = 'wrong grid resolution input, please input a tuple with lat & lon'
             return print(text)
 
     def Interpolate(self):
-        
         try:  
             nds = self.ds.sel(lat=self.lats,lon=self.lons,method='nearest')
             return nds
@@ -35,13 +38,20 @@ class NearestNeighbour():
             return print(text)
 
 class Bilinear():
-    #ds = the dataset that were using
-    #gr = new grid resolution, tuple of a lat & lon
-    #nds = new interpolated dataset
+    """
+        Bilinear interpolation for a dataset
+        
+        Arguments:
+            ds - original dataset (lat, lon, data) xr.Dataset or pd.DataFrame
+            gr - new grid wanted (tuple) 
+    """
     def __init__(self,ds,gr):
         self.ds = ds
+        #gets ds into correct format
         if isinstance(self.ds, pd.DataFrame):
             self.ds = self.ds.set_index(['lat','lon']).to_xarray()
+
+        #get new lat,lon from gr
         try:
             self.lats = gr[0]
             self.lons = gr[1]
@@ -60,12 +70,19 @@ class Bilinear():
 #IDW:
 #   need: data, new grid resolution, power parameter (has default), nearest neighbour vs. full sample (defaultss to nn)
 class idw():
-    #ds = the dataset that were using
-    #gr = new grid resolution, tuple of a lat & lon
-    #nds = new interpolated dataset
-    def __init__(self,ds,gr,power=1):
+    """
+        Simple idw interpolation for a dataset
+        
+        Arguments:
+            ds - original dataset (lat, lon, data) xr.Dataset or pd.DataFrame
+            gr - new grid wanted (tuple)
+            power - idw power variable (defaults 2) 
+    """
+    def __init__(self,ds,gr,power=2):
         self.ds = ds
         self.power = power
+
+        #gets ds into correct format
         if isinstance(self.ds, xr.Dataset):
             self.ds = self.ds.to_dataframe().reset_index()
         self.ds = self.ds.set_axis(['lat','lon','data'],axis=1)
@@ -74,11 +91,13 @@ class idw():
         self.lon = self.ds['lat']
         self.data = self.ds['data']
 
+        #gets grid input into correct format
         if self.lat.size < self.lon.size:
             self.lat.size = np.linspace(self.lat[0],self.lat[-1],num=self.lon.size)
         if self.lon.size < self.lat.size:
             self.lon.size = np.linspace(self.lat[0],self.lat[-1],num=self.lat.size)
 
+        #get new lat,lon from gr
         try:
             self.lats = gr[0]
             self.lons = gr[1]
@@ -131,22 +150,31 @@ class idw():
 #krigging:
 #   need: data, new grid resolution, semivariogram
 class krigging():
-    #ds = the dataset that were using
-    #gr = new grid resolution, tuple of a lat & lon
-    #nds = new interpolated dataset
+    """
+        Krigging interpolation for a dataset
+        
+        Arguments:
+            ds - original dataset (lat, lon, data) xr.Dataset or pd.DataFrame
+            gr - new grid wanted (tuple)
+    """
     def __init__(self,ds,gr):
         self.ds = ds
+
+        #gets ds into correct format
         if isinstance(self.ds, xr.Dataset):
             self.ds = self.ds.to_dataframe().reset_index()
         self.ds = self.ds.set_axis(['lat','lon','data'],axis=1)
 
         self.lat = self.ds['lat']
         self.lon = self.ds['lat']
+
+        #gets grid input into correct format
         if self.lat.size < self.lon.size:
             self.lat.size = np.linspace(self.lat[0],self.lat[-1],num=self.lon.size)
         if self.lon.size < self.lat.size:
             self.lon.size = np.linspace(self.lat[0],self.lat[-1],num=self.lat.size)
 
+        #get new lat,lon from gr
         try:
             self.lats = gr[0]
             self.lons = gr[1]
@@ -169,8 +197,9 @@ class krigging():
 #Barnes:
 #   need: data, new grid resolution
 
-#if name == __main__: tests above methods for test case
+
 if __name__ == "__main__":
+    #test data
     lats_fine = np.arange(25, 50, 0.5)
     lons_fine = np.arange(-120, -70, 0.5)
 
@@ -191,8 +220,6 @@ if __name__ == "__main__":
     #check if xr & pd give same result for nn
     ds_nn_xr = NearestNeighbour(ds_fine_xr, new_grid).Interpolate()
     ds_nn_pd = NearestNeighbour(ds_fine_pd, new_grid).Interpolate()
-    # print(ds_nn_pd)
-    # print(ds_nn_xr)
     if ds_nn_pd['temp'] == ds_nn_xr:
         print('nn gives same result for xr and pd')
     else:
@@ -208,6 +235,7 @@ if __name__ == "__main__":
     else:
         print('bl does not give same result for xr and pd')
 
+    # #check if xr & pd give same result for idw
     ds_idw_xr = idw(ds_fine_xr, new_grid).Interpolate()
     ds_idw_pd = idw(ds_fine_pd, new_grid).Interpolate()
     if (ds_idw_pd == ds_idw_xr):
@@ -215,6 +243,7 @@ if __name__ == "__main__":
     else:
         print('idw does not give same result for xr and pd')
 
+    # #check if xr & pd give same result for kr
     ds_kr_xr = krigging(ds_fine_xr, new_grid).Interpolate()
     ds_kr_pd = krigging(ds_fine_pd, new_grid).Interpolate()
     if (ds_kr_pd == ds_kr_xr).all():
