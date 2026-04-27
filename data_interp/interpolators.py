@@ -70,6 +70,15 @@ class krigging():
         self.ds = ds
         if isinstance(self.ds, xr.Dataset):
             self.ds = self.ds.to_dataframe().reset_index()
+        self.ds = self.ds.set_axis(['lat','lon','data'],axis=1)
+
+        self.lat = self.ds['lat']
+        self.lon = self.ds['lat']
+        if self.lat.size < self.lon.size:
+            self.lat.size = np.linspace(self.lat[0],self.lat[-1],num=self.lon.size)
+        if self.lon.size < self.lat.size:
+            self.lon.size = np.linspace(self.lat[0],self.lat[-1],num=self.lat.size)
+
         try:
             self.lats = gr[0]
             self.lons = gr[1]
@@ -80,12 +89,10 @@ class krigging():
     def Interpolate(self):
         try:
             OK = OrdinaryKriging(
-            self.ds['lat'],
-            self.ds['lon'],
-            self.ds['temp'],
-            verbose=False,
-            enable_plotting=False)
-            nds = OK.execute("grid", self.lats, self.lons)
+            self.lat,
+            self.lon,
+            self.ds['data'])
+            nds,sm = OK.execute("grid", self.lats, self.lons)
             return nds
         except TypeError:
             text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
@@ -119,23 +126,23 @@ if __name__ == "__main__":
     # print(ds_nn_pd)
     # print(ds_nn_xr)
     if ds_nn_pd['temp'] == ds_nn_xr:
-        print('nn works')
+        print('nn gives same result for xr and pd')
     else:
         print(ds_nn_pd)
         print(ds_nn_xr)
-        print('nn broke')
+        print('nn does not give same result for xr and pd')
 
     # #check if xr & pd give same result for bl
     ds_bl_xr = Bilinear(ds_fine_xr, new_grid).Interpolate()
     ds_bl_pd = Bilinear(ds_fine_pd, new_grid).Interpolate()
     if ds_bl_pd['temp'] == ds_bl_xr:
-        print('bl works')
+        print('bl gives same result for xr and pd')
     else:
-        print('bl broke')
+        print('bl does not give same result for xr and pd')
 
     ds_kr_xr = krigging(ds_fine_xr, new_grid).Interpolate()
     ds_kr_pd = krigging(ds_fine_pd, new_grid).Interpolate()
-    if ds_kr_pd['temp'] == ds_kr_xr:
-        print('kr works')
+    if (ds_kr_pd == ds_kr_xr).all():
+        print('kr gives same result for xr and pd')
     else:
-        print('kr broke')
+        print('kr does not give same result for xr and pd')
