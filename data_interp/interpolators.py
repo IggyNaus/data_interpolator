@@ -2,6 +2,9 @@ import numpy as np
 import xarray as xr
 import pandas as pd
 
+import pykrige.kriging_tools as kt
+from pykrige.ok import OrdinaryKriging
+
 #this is Iggys job mostly
 
 #want to define 5 classes: Nearest neighour, bilinear, IDW, unversal krgigging, and Barnes
@@ -59,6 +62,35 @@ class Bilinear():
 
 #krigging:
 #   need: data, new grid resolution, semivariogram
+class krigging():
+    #ds = the dataset that were using
+    #gr = new grid resolution, tuple of a lat & lon
+    #nds = new interpolated dataset
+    def __init__(self,ds,gr):
+        self.ds = ds
+        if isinstance(self.ds, xr.Dataset):
+            self.ds = self.ds.to_dataframe().reset_index()
+        try:
+            self.lats = gr[0]
+            self.lons = gr[1]
+        except IndexError:
+            text = 'wrong grid resolution input, please input a tuple with lat & lon'
+            return print(text)
+        
+    def Interpolate(self):
+        try:
+            OK = OrdinaryKriging(
+            self.ds['lat'],
+            self.ds['lon'],
+            self.ds['temp'],
+            verbose=False,
+            enable_plotting=False
+        )
+            nds = OK.execute("grid", lats_coarse, lons_coarse)
+            return nds
+        except TypeError:
+            text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
+            return print(text)
 
 #Barnes:
 #   need: data, new grid resolution
