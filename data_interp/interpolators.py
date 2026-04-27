@@ -12,20 +12,20 @@ class NearestNeighbour():
     #nds = new interpolated dataset
     def __init__(self,ds,gr):
         self.ds = ds
+        if isinstance(self.ds, pd.DataFrame):
+            self.ds = self.ds.set_index(['lat','lon']).to_xarray()
         self.gr = gr
         try:
-            self.lat = gr[0]
-            self.lon = gr[1]
+            self.lats = gr[0]
+            self.lons = gr[1]
         except IndexError:
             text = 'wrong grid resolution input, please input a tuple with lat & lon'
             return print(text)
 
     def Interpolate(self):
-        try:
-            if self.ds == pd.DataFrame():
-                nds = self.ds.interpolate(method='nearest')
-            else:    
-                nds = self.ds.sel(self.lat,self.lon,method='nearest')
+        
+        try:  
+            nds = self.ds.sel(lat=self.lats,lon=self.lons,method='nearest')
             return nds
         except TypeError:
             text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
@@ -37,19 +37,18 @@ class Bilinear():
     #nds = new interpolated dataset
     def __init__(self,ds,gr):
         self.ds = ds
+        if isinstance(self.ds, pd.DataFrame):
+            self.ds = self.ds.set_index(['lat','lon']).to_xarray()
         try:
-            self.lat = gr[0]
-            self.lon = gr[1]
+            self.lats = gr[0]
+            self.lons = gr[1]
         except IndexError:
             text = 'wrong grid resolution input, please input a tuple with lat & lon'
             return print(text)
         
     def Interpolate(self):
         try:
-            if self.ds == pd.DataFrame():
-                nds = self.ds.interpolate(method='linear')
-            else:    
-                nds = self.ds.interp(self.lat,self.lon)
+            nds = self.ds.interp(lat=self.lats,lon=self.lons)
             return nds
         except TypeError:
             text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
@@ -81,17 +80,24 @@ if __name__ == "__main__":
         {'t2m': (['lat', 'lon'], T, {'units': 'K'})},
         coords={'lat': lats_fine, 'lon': lons_fine}
     )
-    ds_fine_pd = pd.DataFrame(data=T)
+    ds_fine_pd = pd.DataFrame(data={"lat":LAT.flatten(),"lon":LON.flatten(),'temp':T.flatten()})
 
-    ds_nn_xr = NearestNeighbour(ds_fine_xr, new_grid)
-    ds_nn_pd = NearestNeighbour(ds_fine_pd, new_grid)
-    if ds_nn_pd == ds_nn_xr:
+    #check if xr & pd give same result for nn
+    ds_nn_xr = NearestNeighbour(ds_fine_xr, new_grid).Interpolate()
+    ds_nn_pd = NearestNeighbour(ds_fine_pd, new_grid).Interpolate()
+    # print(ds_nn_pd)
+    # print(ds_nn_xr)
+    if ds_nn_pd['temp'] == ds_nn_xr:
         print('nn works')
     else:
+        print(ds_nn_pd)
+        print(ds_nn_xr)
         print('nn broke')
-    ds_bl_xr = Bilinear(ds_fine_xr, new_grid)
-    ds_bl_pd = Bilinear(ds_fine_pd, new_grid)
-    if ds_bl_pd == ds_bl_xr:
+
+    # #check if xr & pd give same result for bl
+    ds_bl_xr = Bilinear(ds_fine_xr, new_grid).Interpolate()
+    ds_bl_pd = Bilinear(ds_fine_pd, new_grid).Interpolate()
+    if ds_bl_pd['temp'] == ds_bl_xr:
         print('bl works')
     else:
         print('bl broke')
