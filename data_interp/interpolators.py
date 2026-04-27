@@ -4,6 +4,7 @@ import pandas as pd
 
 import pykrige.kriging_tools as kt
 from pykrige.ok import OrdinaryKriging
+from fastbarnes import interpolation
 
 
 class NearestNeighbour():
@@ -16,6 +17,7 @@ class NearestNeighbour():
     """
     def __init__(self,ds,gr):
         self.ds = ds
+        self.gr = gr
 
         #gets ds into correct format
         if isinstance(self.ds, pd.DataFrame):
@@ -47,6 +49,7 @@ class Bilinear():
     """
     def __init__(self,ds,gr):
         self.ds = ds
+        self.gr = gr
         #gets ds into correct format
         if isinstance(self.ds, pd.DataFrame):
             self.ds = self.ds.set_index(['lat','lon']).to_xarray()
@@ -69,7 +72,7 @@ class Bilinear():
 
 #IDW:
 #   need: data, new grid resolution, power parameter (has default), nearest neighbour vs. full sample (defaultss to nn)
-class idw():
+class IDW():
     """
         Simple idw interpolation for a dataset
         
@@ -80,6 +83,7 @@ class idw():
     """
     def __init__(self,ds,gr,power=2):
         self.ds = ds
+        self.gr = gr
         self.power = power
 
         #gets ds into correct format
@@ -147,9 +151,7 @@ class idw():
             text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
             return print(text)
 
-#krigging:
-#   need: data, new grid resolution, semivariogram
-class krigging():
+class Krigging():
     """
         Krigging interpolation for a dataset
         
@@ -159,6 +161,7 @@ class krigging():
     """
     def __init__(self,ds,gr):
         self.ds = ds
+        self.gr = gr
 
         #gets ds into correct format
         if isinstance(self.ds, xr.Dataset):
@@ -196,6 +199,58 @@ class krigging():
 
 #Barnes:
 #   need: data, new grid resolution
+class Barnes():
+    """
+        Barnes interpolation for a dataset
+        
+        Arguments:
+            ds - original dataset (lat, lon, data) xr.Dataset or pd.DataFrame
+            gr - new grid wanted (tuple)
+    """
+    def __init__(self,ds,gr,res=1):
+        self.ds = ds
+        self.gr = gr
+        self.res = res
+
+        #gets ds into correct format
+        if isinstance(self.ds, xr.Dataset):
+            self.ds = self.ds.to_dataframe().reset_index()
+        self.ds = self.ds.set_axis(['lat','lon','data'],axis=1)
+
+        self.lat = self.ds['lat']
+        self.lon = self.ds['lat']
+        self.lonlat = np.column_stack([self.lat,self.lon])
+
+        #gets grid input into correct format
+        if self.lat.size < self.lon.size:
+            self.lat.size = np.linspace(self.lat[0],self.lat[-1],num=self.lon.size)
+        if self.lon.size < self.lat.size:
+            self.lon.size = np.linspace(self.lat[0],self.lat[-1],num=self.lat.size)
+
+        #get new lat,lon from gr
+        try:
+            self.lats = gr[0]
+            self.lons = gr[1]
+        except IndexError:
+            text = 'wrong grid resolution input, please input a tuple with lat & lon'
+            return print(text)
+        
+    def Interpolate(self):
+        try:
+            step = 1.0 / self.res
+            x0 = np.asarray([self.lat[0],self.lon[0]], dtype=np.float64)
+            size = self.lats.size,self.lons.size
+            value = self.ds['data'].to_numpy()
+    
+            # calculate Barnes interpolation
+            sigma = 1.0
+            nds = interpolation.barnes(self.lonlat, value, sigma, x0, step, size)
+            nds = nds[~np.isnan(nds)]
+            return nds
+        
+        except TypeError:
+            text = 'wrong dataset input, please input a pd.DataFrame or xr.DataArray'
+            return print(text)
 
 
 if __name__ == "__main__":
@@ -236,17 +291,25 @@ if __name__ == "__main__":
         print('bl does not give same result for xr and pd')
 
     # #check if xr & pd give same result for idw
-    ds_idw_xr = idw(ds_fine_xr, new_grid).Interpolate()
-    ds_idw_pd = idw(ds_fine_pd, new_grid).Interpolate()
+    ds_idw_xr = IDW(ds_fine_xr, new_grid).Interpolate()
+    ds_idw_pd = IDW(ds_fine_pd, new_grid).Interpolate()
     if (ds_idw_pd == ds_idw_xr):
         print('idw gives same result for xr and pd')
     else:
         print('idw does not give same result for xr and pd')
 
     # #check if xr & pd give same result for kr
-    ds_kr_xr = krigging(ds_fine_xr, new_grid).Interpolate()
-    ds_kr_pd = krigging(ds_fine_pd, new_grid).Interpolate()
+    ds_kr_xr = Krigging(ds_fine_xr, new_grid).Interpolate()
+    ds_kr_pd = Krigging(ds_fine_pd, new_grid).Interpolate()
     if (ds_kr_pd == ds_kr_xr).all():
         print('kr gives same result for xr and pd')
     else:
         print('kr does not give same result for xr and pd')
+
+    # #check if xr & pd give same result for br
+    ds_br_xr = Barnes(ds_fine_xr, new_grid,1).Interpolate()
+    ds_br_pd = Barnes(ds_fine_pd, new_grid,1).Interpolate()
+    if (ds_br_pd == ds_br_xr).all():
+        print('barnes gives same result for xr and pd')
+    else:
+        print('barnes does not give same result for xr and pd')
