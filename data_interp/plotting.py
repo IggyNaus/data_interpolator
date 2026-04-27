@@ -136,6 +136,7 @@ class Plotters():
                 self.simple_map(pass_ax=axes["B"], var_name=var_name2, lat_start=lat_start2, 
                 lat_end=lat_end2, lon_start=lon_start2, lon_end=lon_end2, colour_map=colourmap2)
                 plt.savefig((var_name1 + "_and_" + var_name2+"_1m1m.png"),dpi=250,bbox_inches='tight')
+                return axes
             
     def simple_layout_plots(self, layout, x1=None, y1=None, x2=None, y2=None):
         """
@@ -185,6 +186,7 @@ class Plotters():
                 fig,ax = plt.subplots(figsize=(2, 2), layout='constrained')
                 self.simple_plot(ax,x1,y1)
                 plt.savefig((y1 + "_vs_" + x1+"_1p.png"),dpi=250,bbox_inches='tight')
+                return ax
             case "1p1p":
                 if (x1 is None) or (y1 is None) or (x2 is None) or (y2 is None):
                     raise ValueError("Please enter valid x1, y1, x2, y2")
@@ -197,7 +199,8 @@ class Plotters():
                 )
                 self.simple_plot(axes["A"], x1, y1)
                 self.simple_plot(axes["B"], x2, y2)
-                plt.savefig((y1 + "_vs_" + x1 + "_and_" + y2 + "_vs_" + x2+"_1p1p.png"),dpi=250,bbox_inches='tight')
+                # plt.savefig((y1 + "_vs_" + x1 + "_and_" + y2 + "_vs_" + x2+"_1p1p.png"),dpi=250,bbox_inches='tight') #optional - save here directly
+                return axes
             case "2p1m":
                 if (x1 is None) or (y1 is None) or (x2 is None) or (y2 is None):
                     raise ValueError("Please enter valid x1, y1, x2, y2")
