@@ -64,6 +64,14 @@ In-code user guide, intended to be edited by users to their needs
 
 ## Dependencies
 
+- Python 3.11  
+- xarray  
+- numpy  
+- matplotlib  
+- pandas  
+- pykrige  
+- fastbarnes
+
 ---
 
 ## Authors
