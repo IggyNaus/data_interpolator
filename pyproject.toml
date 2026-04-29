@@ -16,6 +16,8 @@ authors = [
 dependencies = [
     "numpy >= 1.22",
     "matplotlib >= 3.5",
+    "pykrige >= 1.7.3" ,
+    "fastbarnes >= 2.0.0",
 ]
 
 [project.optional-dependencies]
