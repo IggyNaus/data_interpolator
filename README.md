@@ -24,6 +24,14 @@ data_interpolator/
 ---
 
 ## Instalation
+Clone the repo:
+
+git clone https://github.com/IggyNaus/data_interpolator
+git cd data_interpolator
+
+Install the package:
+
+pip install -e .  
 
 ---
 
