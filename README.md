@@ -40,6 +40,8 @@ Goal: to be able to select across a wide variety of data input methods and retur
 User-specified input data type, turn CSV to pd dataframe, turn NetCDF to xr data array, etc. 
 Export data to local files. This has an optional double use as a standalone file converter, for users to grab files and download them even if they do not end up using the rest of the project. 
 
+---
+
 ## interpolators.py→ Defines classes that take a data array and return a data array interpolated to a specified grid
 
 Nearest neighbour class
@@ -62,13 +64,36 @@ if __name__ == main tests to make sure an equivalent dataframe and dataset will 
 ---
 
 ## plotting.py → Uses one of the interpolators to give a plot of the new grid
-Which interpolator() → lets user choose which interpolator, defaults to NN
-plotting() → plots interpolated grid
+Plotters Class
+-Defines a series of helpful plotting tools for data visualisation and comparison. These include: 
+
+simple_plot:
+-Simple x-y plot on provided axes. Tries to apply default formatting and set automatic x-ticks. 
+
+simple_map:
+-Simple cartopy map plot on provided GeoAxes. Applies default formatting and country borders under the plot by default. 
+
+simple_layout_maps:
+-Automates composing multiple map plots on one single set of axes. Relies on an input function to allow user to set target variable, latitude range, and longitude range. 
+-FUTURE GOAL: CHange from fixed list of layouts to dynamically-allocated layouts for more customization.
+
+simple_layout_plots:
+-Adds further x-y simple_plots to layout options. 
+-FUTURE GOAL: CHange from fixed list of layouts to dynamically-allocated layouts for more customization.
+
+Simple_plots and Simple_maps are on provided axes passed as a function argument. Both Simple_layout functions return their mosaic axes. These enable users to override default function formatting options and change formatting to their liking. 
+
+## get_input_helper → Automated user input for map plotting 
+Contains a series of helper functions aimed to reduce the input load directly in the Plotters class. Provide layout-specific input options and input verification, as well as automating shared inputs across multiple plots to simply user input.  
+
+---
 
 ## driver.py → Main function
 Dataset input examples
 Plotting and Interpolation exams
 In-code user guide, intended to be edited by users to their needs
+
+---
 
 ## Dependencies
 
@@ -79,6 +104,7 @@ In-code user guide, intended to be edited by users to their needs
 - pandas  
 - pykrige  
 - fastbarnes
+- cartopy
 
 ---
 
