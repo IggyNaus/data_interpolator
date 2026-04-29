@@ -114,5 +114,8 @@ Made by Skai Glasser & Iggy Naus.
 
 ---
 
+## License
+
+MIT License
 
 
