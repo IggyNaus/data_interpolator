@@ -399,7 +399,7 @@ class Barnes():
             return print(text)
 
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     # Create synthetic fine-resolution latitude and longitude arrays.
     lats_fine = np.arange(25, 50, 0.5)
     lons_fine = np.arange(-120, -70, 0.5)
